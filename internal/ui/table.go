@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"release-handler/config"
 	"release-handler/internal/models"
+	"release-handler/internal/scm/azure"
 	_ "release-handler/internal/scm/azure"
 	"runtime"
 	"sort"
@@ -20,7 +21,7 @@ func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {
 		SetBorders(true).
 		SetSelectable(true, false)
 
-	headers := []string{"Created By", "Ticket Name", "Jira", "Azure", "Action"}
+	headers := []string{"Created By", "Ticket Name", "Jira", "Azure", "isApproved", "Action"}
 	for col, title := range headers {
 		table.SetCell(0, col, tview.NewTableCell(title).
 			SetTextColor(tcell.ColorYellow).
@@ -43,22 +44,24 @@ func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {
 		return prList[i].PullRequest.CreationDate.Before(prList[j].PullRequest.CreationDate)
 	})
 
-	for row, mergeRequest := range prList {
-		if mergeRequest.PullRequest != nil {
-			table.SetCell(row+1, 0, tview.NewTableCell(mergeRequest.PullRequest.CreatedBy.DisplayName).SetAlign(tview.AlignLeft))
-			table.SetCell(row+1, 1, tview.NewTableCell(mergeRequest.Ticket.Key).SetAlign(tview.AlignLeft))
-			table.SetCell(row+1, 2, tview.NewTableCell(mergeRequest.Ticket.Fields.Status.Name).SetAlign(tview.AlignLeft))
-			table.SetCell(row+1, 3, tview.NewTableCell(mergeRequest.PullRequest.Status).SetAlign(tview.AlignLeft).SetTextColor(textColorByStatus(mergeRequest.PullRequest.Status)))
-			table.SetCell(row+1, 4, tview.NewTableCell("[Go to PR]").
+	for row, tableTicket := range prList {
+		if tableTicket.PullRequest != nil {
+			table.SetCell(row+1, 0, tview.NewTableCell(tableTicket.PullRequest.CreatedBy.DisplayName).SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 1, tview.NewTableCell(tableTicket.Ticket.Key).SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 2, tview.NewTableCell(tableTicket.Ticket.Fields.Status.Name).SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 3, tview.NewTableCell(tableTicket.PullRequest.Status).SetAlign(tview.AlignLeft).SetTextColor(textColorByStatus(tableTicket.PullRequest.Status)))
+			table.SetCell(row+1, 4, tview.NewTableCell(getFinalReviewStatus(tableTicket.PullRequest.Reviewers)).SetAlign(tview.AlignLeft).SetTextColor(textColorByStatus(tableTicket.PullRequest.Status)))
+			table.SetCell(row+1, 5, tview.NewTableCell("[Go to PR]").
 				SetTextColor(tcell.ColorBlue).
 				SetSelectable(true).
 				SetAlign(tview.AlignCenter))
 		} else {
-			table.SetCell(row+1, 0, tview.NewTableCell(mergeRequest.Ticket.Fields.Assignee.DisplayName).SetAlign(tview.AlignLeft))
-			table.SetCell(row+1, 1, tview.NewTableCell(mergeRequest.Ticket.Key).SetAlign(tview.AlignLeft))
-			table.SetCell(row+1, 2, tview.NewTableCell(mergeRequest.Ticket.Fields.Status.Name).SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 0, tview.NewTableCell(tableTicket.Ticket.Fields.Assignee.DisplayName).SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 1, tview.NewTableCell(tableTicket.Ticket.Key).SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 2, tview.NewTableCell(tableTicket.Ticket.Fields.Status.Name).SetAlign(tview.AlignLeft))
 			table.SetCell(row+1, 3, tview.NewTableCell("No PR Found!").SetAlign(tview.AlignLeft).SetTextColor(tcell.ColorRed))
-			table.SetCell(row+1, 4, tview.NewTableCell("[Go to JIRA]").
+			table.SetCell(row+1, 4, tview.NewTableCell("N/A").SetAlign(tview.AlignLeft))
+			table.SetCell(row+1, 5, tview.NewTableCell("[Go to JIRA]").
 				SetTextColor(tcell.ColorBlue).
 				SetSelectable(true).
 				SetAlign(tview.AlignCenter))
@@ -96,9 +99,9 @@ func generateTicketURL(urlType string, ticket models.TableTicket) string {
 	case "azure":
 		if ticket.PullRequest != nil {
 			return fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/pullrequest/%d",
-				viper.GetString("AzureOrganization"),
-				viper.GetString("AzureProject"),
-				viper.GetString("AzureRepositoryId"),
+				viper.GetString(config.AzureOrganization),
+				viper.GetString(config.AzureProject),
+				viper.GetString(config.AzureRepositoryId),
 				ticket.PullRequest.Id,
 			)
 		}
@@ -111,6 +114,35 @@ func generateTicketURL(urlType string, ticket models.TableTicket) string {
 		}
 	}
 	return ""
+}
+
+func getFinalReviewStatus(reviewers []azure.Reviewer) string {
+	hasRejected := false
+	hasWaitingAuthor := false
+	hasApproval := false
+
+	for _, reviewer := range reviewers {
+		switch reviewer.Vote {
+		case -10:
+			hasRejected = true
+		case -5:
+			hasWaitingAuthor = true
+		case 10, 5:
+			hasApproval = true
+		}
+	}
+
+	if hasRejected {
+		return "Rejected"
+	}
+	if hasWaitingAuthor {
+		return "Waiting Author"
+	}
+	if hasApproval {
+		return "Yes"
+	}
+
+	return "No"
 }
 
 func openInBrowser(url string) error {

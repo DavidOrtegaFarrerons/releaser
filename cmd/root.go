@@ -32,9 +32,9 @@ func initConfig() {
 		return
 	}
 
-	configFile := filepath.Join(homeDir, ".release-handler.json")
+	configFile := filepath.Join(homeDir, ".release-handler.yaml")
 
-	viper.SetConfigType("json")
+	viper.SetConfigType("yaml")
 	viper.SetConfigFile(configFile)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {

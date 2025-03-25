@@ -53,6 +53,16 @@ The project uses **Viper** for configuration management. You can configure your 
 ./releaser table
 ```
 
+### Generate a tag for release (format: release-YYYY-MM-DD)
+```
+./releaser tag [rls|release]
+```
+
+### Generate a tag for production ((format: prod-YYYY-MM-DD)
+```
+./releaser tag [prd|prod|production]
+
+
 🔮 Future Improvements
 ----------------------
 
@@ -60,9 +70,7 @@ Planned enhancements for upcoming versions:
 
 -   **Multi-repo Support**: Handle pull requests from multiple repositories like bitbucket, github and gitlab
 
--   **Tag creation**: Support for creating custom tags for the releases
-
--   **Release Notes Generation**: Automatic markdown generation from collected tickets
+-   **Tag creation**: Support for creating custom tags for the releases --> This is already implemented 
 
 -   **Enhanced Configuration**: GUI configurator and validation to make setup of the tool easier
 

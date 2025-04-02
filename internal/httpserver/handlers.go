@@ -18,6 +18,20 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 
 func ReleaseHandler(w http.ResponseWriter, r *http.Request) {
 	response := release.MergeTickets()
+
+	dtoResponse := make(map[string]TableTicketDTO)
+	for key, value := range response {
+		dtoResponse[key] = ToTableTicketDTO(value)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+
+	if len(dtoResponse) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(dtoResponse); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }

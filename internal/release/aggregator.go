@@ -17,20 +17,20 @@ func CreateReleaseTable() {
 
 func MergeTickets() map[string]models.TableTicket {
 	issues := jira.AllReleaseIssues()
-	mergeRequests := azure.AllReleaseMergeRequests()
+	pullRequests := azure.AllReleaseMergeRequests()
 
 	ticketsAndMergeRequestsMap := make(map[string]models.TableTicket)
 
 	createTicketMap(issues, ticketsAndMergeRequestsMap)
-	fillTicketsWithMergeRequests(mergeRequests, ticketsAndMergeRequestsMap)
+	AddPullRequestsToTickets(pullRequests, ticketsAndMergeRequestsMap)
 
 	return ticketsAndMergeRequestsMap
 }
 
-func fillTicketsWithMergeRequests(pullRequests []azure.PullRequest, m map[string]models.TableTicket) {
+func AddPullRequestsToTickets(pullRequests []azure.PullRequest, m map[string]models.TableTicket) {
 	for _, mr := range pullRequests {
-		ticketPattern := ticketPattern(mr.BranchName)
-		if ticket, exists := m[ticketPattern]; exists {
+		ticketPrefix := ticketPrefix(mr.BranchName)
+		if ticket, exists := m[ticketPrefix]; exists {
 			m[mr.BranchName] = models.TableTicket{
 				PullRequest: &mr,
 				Ticket:      ticket.Ticket,
@@ -45,7 +45,7 @@ func createTicketMap(issues []jira.Ticket, m map[string]models.TableTicket) {
 	}
 }
 
-func ticketPattern(value string) string {
+func ticketPrefix(value string) string {
 	pattern := viper.GetString(config.TicketPrefix) + `-\d+`
 	re := regexp.MustCompile(pattern)
 

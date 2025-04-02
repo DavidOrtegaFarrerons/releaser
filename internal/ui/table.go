@@ -50,7 +50,7 @@ func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {
 			table.SetCell(row+1, 1, tview.NewTableCell(tableTicket.Ticket.Key).SetAlign(tview.AlignLeft))
 			table.SetCell(row+1, 2, tview.NewTableCell(tableTicket.Ticket.Fields.Status.Name).SetAlign(tview.AlignLeft))
 			table.SetCell(row+1, 3, tview.NewTableCell(tableTicket.PullRequest.Status).SetAlign(tview.AlignLeft).SetTextColor(textColorByStatus(tableTicket.PullRequest.Status)))
-			table.SetCell(row+1, 4, tview.NewTableCell(getFinalReviewStatus(tableTicket.PullRequest.Reviewers)).SetAlign(tview.AlignLeft).SetTextColor(textColorByStatus(tableTicket.PullRequest.Status)))
+			table.SetCell(row+1, 4, tview.NewTableCell(azure.GetFinalReviewStatus(tableTicket.PullRequest.Reviewers)).SetAlign(tview.AlignLeft).SetTextColor(textColorByStatus(tableTicket.PullRequest.Status)))
 			table.SetCell(row+1, 5, tview.NewTableCell("[Go to PR]").
 				SetTextColor(tcell.ColorBlue).
 				SetSelectable(true).
@@ -114,35 +114,6 @@ func generateTicketURL(urlType string, ticket models.TableTicket) string {
 		}
 	}
 	return ""
-}
-
-func getFinalReviewStatus(reviewers []azure.Reviewer) string {
-	hasRejected := false
-	hasWaitingAuthor := false
-	hasApproval := false
-
-	for _, reviewer := range reviewers {
-		switch reviewer.Vote {
-		case -10:
-			hasRejected = true
-		case -5:
-			hasWaitingAuthor = true
-		case 10, 5:
-			hasApproval = true
-		}
-	}
-
-	if hasRejected {
-		return "Rejected"
-	}
-	if hasWaitingAuthor {
-		return "Waiting Author"
-	}
-	if hasApproval {
-		return "Yes"
-	}
-
-	return "No"
 }
 
 func openInBrowser(url string) error {

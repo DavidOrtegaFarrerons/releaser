@@ -11,6 +11,11 @@ import (
 )
 
 func CreateReleaseTable() {
+	mergedTickets := MergeTickets()
+	ui.ReleaseTable(mergedTickets)
+}
+
+func MergeTickets() map[string]models.TableTicket {
 	issues := jira.AllReleaseIssues()
 	mergeRequests := azure.AllReleaseMergeRequests()
 
@@ -19,12 +24,11 @@ func CreateReleaseTable() {
 	createTicketMap(issues, ticketsAndMergeRequestsMap)
 	fillTicketsWithMergeRequests(mergeRequests, ticketsAndMergeRequestsMap)
 
-	ui.ReleaseTable(ticketsAndMergeRequestsMap)
-
+	return ticketsAndMergeRequestsMap
 }
 
-func fillTicketsWithMergeRequests(mergeRequests []azure.PullRequest, m map[string]models.TableTicket) {
-	for _, mr := range mergeRequests {
+func fillTicketsWithMergeRequests(pullRequests []azure.PullRequest, m map[string]models.TableTicket) {
+	for _, mr := range pullRequests {
 		ticketPattern := ticketPattern(mr.BranchName)
 		if ticket, exists := m[ticketPattern]; exists {
 			m[mr.BranchName] = models.TableTicket{

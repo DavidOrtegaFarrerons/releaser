@@ -7,13 +7,7 @@ import (
 	"release-handler/internal/jira"
 	"release-handler/internal/models"
 	"release-handler/internal/scm/azure"
-	"release-handler/internal/ui"
 )
-
-func CreateReleaseTable() {
-	mergedTickets := MergeTickets()
-	ui.ReleaseTable(mergedTickets)
-}
 
 func MergeTickets() map[string]models.TableTicket {
 	issues := jira.AllReleaseIssues()

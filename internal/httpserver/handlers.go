@@ -12,16 +12,16 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := w.Write([]byte("OK"))
 
 	if err != nil {
-		fmt.Println("There has been an error in the healthcheck: " + err.Error())
+		fmt.Println("There has been an error in the healthcheck: ", err)
 	}
 }
 
 func ReleaseHandler(w http.ResponseWriter, r *http.Request) {
-	response := release.MergeTickets()
+	tickets := release.MergeTickets()
 
-	dtoResponse := make(map[string]TableTicketDTO)
-	for key, value := range response {
-		dtoResponse[key] = ToTableTicketDTO(value)
+	dtoResponse := make([]TableTicketDTO, 0, len(tickets))
+	for _, ticket := range tickets {
+		dtoResponse = append(dtoResponse, ToTableTicketDTO(ticket))
 	}
 
 	w.Header().Set("Content-Type", "application/json")

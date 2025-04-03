@@ -9,11 +9,17 @@ import (
 	"os/exec"
 	"release-handler/config"
 	"release-handler/internal/models"
+	"release-handler/internal/release"
 	"release-handler/internal/scm/azure"
 	_ "release-handler/internal/scm/azure"
 	"runtime"
 	"sort"
 )
+
+func CreateReleaseTable() {
+	mergedTickets := release.MergeTickets()
+	ReleaseTable(mergedTickets)
+}
 
 // ReleaseTable renders a table with pull requests
 func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {

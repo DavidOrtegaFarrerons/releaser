@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"fmt"
 	"release-handler/internal/jira"
 	"release-handler/internal/models"
 	"release-handler/internal/scm/azure"
@@ -9,10 +8,10 @@ import (
 )
 
 type PullRequestDTO struct {
-	Id           int    `json:"pullRequestId"`
+	Id           int    `json:"id"`
 	Status       string `json:"status"`
 	CreatedBy    string `json:"createdBy"`
-	BranchName   string `json:"sourceRefName"`
+	BranchName   string `json:"branchName"`
 	Url          string `json:"url"`
 	CreationDate string `json:"creationDate"`
 	MergeStatus  string `json:"mergeStatus"`
@@ -23,10 +22,15 @@ type ReviewerDTO struct {
 }
 
 type TicketDTO struct {
-	Id       string `json:"id"`
-	Key      string `json:"key"`
-	Assignee string `json:"assignee"`
-	Status   string `json:"status"`
+	Id       string            `json:"id"`
+	Key      string            `json:"key"`
+	Assignee TicketAssigneeDTO `json:"assignee"`
+	Status   string            `json:"status"`
+}
+
+type TicketAssigneeDTO struct {
+	DisplayName  string `json:"displayName"`
+	ProfileImage string `json:"profileImage"`
 }
 
 type TableTicketDTO struct {
@@ -35,7 +39,6 @@ type TableTicketDTO struct {
 }
 
 func ToPullRequestDTO(pr *azure.PullRequest) *PullRequestDTO {
-	fmt.Println(pr)
 	if pr == nil {
 		return nil
 	}
@@ -59,15 +62,21 @@ func ToTicketDTO(ticket *jira.Ticket) *TicketDTO {
 	return &TicketDTO{
 		Id:       ticket.Id,
 		Key:      ticket.Key,
-		Assignee: ticket.Fields.Assignee.DisplayName,
+		Assignee: toTicketAssigneeDto(ticket.Fields.Assignee),
 		Status:   ticket.Fields.Status.Name,
 	}
 }
 
 func ToTableTicketDTO(tableTicket models.TableTicket) TableTicketDTO {
-	fmt.Println(tableTicket)
 	return TableTicketDTO{
 		PullRequest: ToPullRequestDTO(tableTicket.PullRequest),
 		Ticket:      ToTicketDTO(tableTicket.Ticket),
+	}
+}
+
+func toTicketAssigneeDto(assignee jira.Assignee) TicketAssigneeDTO {
+	return TicketAssigneeDTO{
+		DisplayName:  assignee.DisplayName,
+		ProfileImage: assignee.AvatarUrls.Size32,
 	}
 }

@@ -23,8 +23,8 @@ func GetFinalReviewStatus(reviewers []Reviewer) string {
 		return "Waiting Author"
 	}
 	if hasApproval {
-		return "Yes"
+		return "Approved"
 	}
 
-	return "No"
+	return "Not Approved"
 }

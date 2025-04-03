@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"release-handler/internal/release"
+	"release-handler/internal/ui"
 )
 
 var tableCmd = &cobra.Command{
@@ -11,7 +11,7 @@ var tableCmd = &cobra.Command{
 	Long: `A simple CLI tool that helps developers
 			get a synchronized view of jira tickets and Pull Requests`,
 	Run: func(cmd *cobra.Command, args []string) {
-		release.CreateReleaseTable()
+		ui.CreateReleaseTable()
 	},
 }
 

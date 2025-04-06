@@ -10,8 +10,22 @@ import (
 )
 
 func MergeTickets() []models.TableTicket {
-	tickets := jira.AllReleaseIssues()
-	pullRequests := azure.AllReleaseMergeRequests()
+
+	ticketsChan := make(chan []jira.Ticket, 1)
+	pullRequestsChan := make(chan []azure.PullRequest, 1)
+
+	go func() {
+		tickets := jira.AllReleaseIssues()
+		ticketsChan <- tickets
+	}()
+
+	go func() {
+		pullRequests := azure.AllReleaseMergeRequests()
+		pullRequestsChan <- pullRequests
+	}()
+
+	tickets := <-ticketsChan
+	pullRequests := <-pullRequestsChan
 
 	ticketsAndMergeRequestsMap := make(map[string]models.TableTicket)
 

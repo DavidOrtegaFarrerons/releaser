@@ -9,16 +9,24 @@ import (
 	"release-handler/internal/scm/azure"
 )
 
-func MergeTickets() map[string]models.TableTicket {
-	issues := jira.AllReleaseIssues()
+func MergeTickets() []models.TableTicket {
+	tickets := jira.AllReleaseIssues()
 	pullRequests := azure.AllReleaseMergeRequests()
 
 	ticketsAndMergeRequestsMap := make(map[string]models.TableTicket)
 
-	createTicketMap(issues, ticketsAndMergeRequestsMap)
+	createTicketMap(tickets, ticketsAndMergeRequestsMap)
 	AddPullRequestsToTickets(pullRequests, ticketsAndMergeRequestsMap)
 
-	return ticketsAndMergeRequestsMap
+	orderedTickets := make([]models.TableTicket, 0)
+
+	for _, issue := range tickets {
+		if ticket, exists := ticketsAndMergeRequestsMap[issue.Key]; exists {
+			orderedTickets = append(orderedTickets, ticket)
+		}
+	}
+
+	return orderedTickets
 }
 
 func AddPullRequestsToTickets(pullRequests []azure.PullRequest, m map[string]models.TableTicket) {

@@ -13,7 +13,6 @@ import (
 	"release-handler/internal/scm/azure"
 	_ "release-handler/internal/scm/azure"
 	"runtime"
-	"sort"
 )
 
 func CreateReleaseTable() {
@@ -22,7 +21,7 @@ func CreateReleaseTable() {
 }
 
 // ReleaseTable renders a table with pull requests
-func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {
+func ReleaseTable(tableTickets []models.TableTicket) {
 	table := tview.NewTable().
 		SetBorders(true).
 		SetSelectable(true, false)
@@ -35,22 +34,7 @@ func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {
 			SetSelectable(false))
 	}
 
-	var prList []models.TableTicket
-	for _, pr := range ticketsAndMergeRequestsList {
-		prList = append(prList, pr)
-	}
-
-	sort.Slice(prList, func(i, j int) bool {
-		if prList[i].PullRequest == nil {
-			return false // Move nil values to the end
-		}
-		if prList[j].PullRequest == nil {
-			return true // Move valid values before nil ones
-		}
-		return prList[i].PullRequest.CreationDate.Before(prList[j].PullRequest.CreationDate)
-	})
-
-	for row, tableTicket := range prList {
+	for row, tableTicket := range tableTickets {
 		if tableTicket.PullRequest != nil {
 			table.SetCell(row+1, 0, tview.NewTableCell(tableTicket.PullRequest.CreatedBy.DisplayName).SetAlign(tview.AlignLeft))
 			table.SetCell(row+1, 1, tview.NewTableCell(tableTicket.Ticket.Key).SetAlign(tview.AlignLeft))
@@ -75,8 +59,8 @@ func ReleaseTable(ticketsAndMergeRequestsList map[string]models.TableTicket) {
 	}
 
 	table.SetSelectedFunc(func(row, column int) {
-		if row > 0 && row <= len(prList) {
-			selectedPR := prList[row-1]
+		if row > 0 && row <= len(tableTickets) {
+			selectedPR := tableTickets[row-1]
 
 			url := ""
 			if selectedPR.PullRequest != nil {

@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"github.com/spf13/viper"
 	"os"
 	"os/exec"
-	"release-handler/config"
+	"release-handler/internal/helper"
 	"release-handler/internal/models"
 	"release-handler/internal/release"
 	"release-handler/internal/scm/azure"
@@ -64,9 +63,9 @@ func ReleaseTable(tableTickets []models.TableTicket) {
 
 			url := ""
 			if selectedPR.PullRequest != nil {
-				url = generateTicketURL("azure", selectedPR)
+				url = helper.GenerateUrl("azure", selectedPR)
 			} else {
-				url = generateTicketURL("jira", selectedPR)
+				url = helper.GenerateUrl("jira", selectedPR)
 			}
 
 			err := openInBrowser(url)
@@ -82,28 +81,6 @@ func ReleaseTable(tableTickets []models.TableTicket) {
 	if err := app.Run(); err != nil {
 		fmt.Println("Error running application:", err)
 	}
-}
-
-func generateTicketURL(urlType string, ticket models.TableTicket) string {
-	switch urlType {
-	case "azure":
-		if ticket.PullRequest != nil {
-			return fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/pullrequest/%d",
-				viper.GetString(config.AzureOrganization),
-				viper.GetString(config.AzureProject),
-				viper.GetString(config.AzureRepositoryId),
-				ticket.PullRequest.Id,
-			)
-		}
-	case "jira":
-		if ticket.Ticket != nil {
-			return fmt.Sprintf("https://%s.atlassian.net/browse/%s",
-				viper.GetString(config.JiraDomain),
-				ticket.Ticket.Key,
-			)
-		}
-	}
-	return ""
 }
 
 func openInBrowser(url string) error {

@@ -14,6 +14,7 @@ type PullRequest struct {
 	Url          string     `json:"url"`
 	CreationDate time.Time  `json:"creationDate"`
 	Reviewers    []Reviewer `json:"reviewers"`
+	MergeStatus  string     `json:"mergeStatus"`
 }
 
 type User struct {

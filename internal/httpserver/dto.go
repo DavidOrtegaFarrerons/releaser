@@ -1,9 +1,11 @@
 package httpserver
 
 import (
+	"release-handler/internal/helper"
 	"release-handler/internal/jira"
 	"release-handler/internal/models"
 	"release-handler/internal/scm/azure"
+	"strings"
 	"time"
 )
 
@@ -25,6 +27,7 @@ type TicketDTO struct {
 	Id       string            `json:"id"`
 	Key      string            `json:"key"`
 	Assignee TicketAssigneeDTO `json:"assignee"`
+	Url      string            `json:"url"`
 	Status   string            `json:"status"`
 }
 
@@ -45,12 +48,12 @@ func ToPullRequestDTO(pr *azure.PullRequest) *PullRequestDTO {
 
 	return &PullRequestDTO{
 		Id:           pr.Id,
-		Status:       pr.Status,
+		MergeStatus:  pr.MergeStatus,
 		CreatedBy:    pr.CreatedBy.DisplayName,
-		BranchName:   pr.BranchName,
-		Url:          pr.Url,
+		BranchName:   strings.Replace(pr.BranchName, "refs/heads/", "", 1),
+		Url:          helper.GeneratePullRequestUrl(pr),
 		CreationDate: pr.CreationDate.Format(time.RFC3339),
-		MergeStatus:  azure.GetFinalReviewStatus(pr.Reviewers),
+		Status:       azure.GetFinalReviewStatus(pr.Reviewers),
 	}
 }
 
@@ -63,6 +66,7 @@ func ToTicketDTO(ticket *jira.Ticket) *TicketDTO {
 		Id:       ticket.Id,
 		Key:      ticket.Key,
 		Assignee: toTicketAssigneeDto(ticket.Fields.Assignee),
+		Url:      helper.GenerateTicketUrl(ticket),
 		Status:   ticket.Fields.Status.Name,
 	}
 }

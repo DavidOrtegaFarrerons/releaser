@@ -47,7 +47,7 @@ func AddPullRequestsToTickets(pullRequests []azure.PullRequest, m map[string]mod
 	for _, mr := range pullRequests {
 		ticketPrefix := ticketPrefix(mr.BranchName)
 		if ticket, exists := m[ticketPrefix]; exists {
-			m[mr.BranchName] = models.TableTicket{
+			m[ticketPrefix] = models.TableTicket{
 				PullRequest: &mr,
 				Ticket:      ticket.Ticket,
 			}

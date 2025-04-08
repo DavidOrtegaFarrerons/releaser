@@ -20,7 +20,7 @@ func MergeTickets() []models.TableTicket {
 	}()
 
 	go func() {
-		pullRequests := azure.AllReleaseMergeRequests()
+		pullRequests := azure.ReleasePullRequests()
 		pullRequestsChan <- pullRequests
 	}()
 

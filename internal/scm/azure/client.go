@@ -1,58 +1,62 @@
 package azure
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
-	"os"
 	"release-handler/config"
-	"time"
 )
 
 const username = "azure" //Azure ignores username as it only uses the PAT
 
-func ReleaseMergeRequests() Response {
+type Client struct {
+	BaseURL    string
+	AuthHeader string
+	HTTPClient *http.Client
+}
 
-	auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + viper.GetString(config.AzureApiKey)))
+func NewClient() *Client {
+	return &Client{
+		BaseURL:    fmt.Sprintf("https://dev.azure.com/%s/%s/_apis", viper.GetString(config.AzureOrganization), viper.GetString(config.AzureProject)),
+		AuthHeader: base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, viper.GetString(config.AzureApiKey)))),
+		HTTPClient: &http.Client{},
+	}
+}
 
-	now := time.Now()
-	lastFifteenDays := now.AddDate(0, 0, -15)
+func (c *Client) DoRequest(method string, endpoint string, body interface{}) ([]byte, error) {
+	var reqBody io.Reader
+	if body != nil {
+		jsonBytes, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		reqBody = bytes.NewBuffer(jsonBytes)
+	}
 
-	url := "https://dev.azure.com/" + viper.GetString(config.AzureOrganization) + "/" + viper.GetString(config.AzureProject) + "/_apis/git/repositories/" + viper.GetString(config.AzureRepositoryId) + "/pullrequests?searchCriteria.targetRefName=refs/heads/release&searchCriteria.maxTime=" + lastFifteenDays.Format(time.RFC3339) + "&searchCriteria.status=all&api-version=7.1"
-	req, err := http.NewRequest("GET", url, nil)
+	url := fmt.Sprintf("%s%s", c.BaseURL, endpoint)
+	req, err := http.NewRequest(method, url, reqBody)
 	if err != nil {
-		fmt.Println("Error creating request:", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Basic "+auth)
+	req.Header.Set("Authorization", "Basic "+c.AuthHeader)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		fmt.Println("Error making request:", err)
-		os.Exit(1)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	// Read response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		os.Exit(1)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
-	var response Response
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		fmt.Println("Error decoding json:", err)
-	}
-
-	return response
+	return io.ReadAll(resp.Body)
 }

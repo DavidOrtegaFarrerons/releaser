@@ -1,6 +1,7 @@
 package config
 
 const (
+	CorsDomain        = "CORS_DOMAIN"
 	JiraApiKey        = "JIRA_KEY"
 	JiraDomain        = "JIRA_DOMAIN"
 	JiraJQL           = "JIRA_JQL"

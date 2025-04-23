@@ -49,6 +49,7 @@ func initConfig() {
 		viper.SetDefault(config.AzureProject, "")
 		viper.SetDefault(config.AzureRepositoryId, "")
 		viper.SetDefault(config.TicketPrefix, "")
+		viper.SetDefault(config.CorsDomain, "")
 
 		if err := viper.SafeWriteConfigAs(configFile); err != nil {
 			fmt.Println("Error writing default config:", err)

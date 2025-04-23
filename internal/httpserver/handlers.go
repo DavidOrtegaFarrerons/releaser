@@ -3,7 +3,9 @@ package httpserver
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"net/http"
+	"release-handler/config"
 	"release-handler/internal/release"
 	"release-handler/internal/scm/azure"
 )
@@ -18,7 +20,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReleaseHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5174")
+	w.Header().Set("Access-Control-Allow-Origin", viper.GetString(config.CorsDomain))
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
@@ -41,7 +43,7 @@ func ReleaseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetAutoCompletePullRequestHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5174")
+	w.Header().Set("Access-Control-Allow-Origin", viper.GetString(config.CorsDomain))
 	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")

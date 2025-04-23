@@ -43,7 +43,7 @@ func (c *Client) DoRequest(method string, endpoint string, body interface{}) ([]
 		return nil, err
 	}
 
-	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept", "*/*")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+c.AuthHeader)
 

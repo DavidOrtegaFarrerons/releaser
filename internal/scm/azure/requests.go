@@ -36,3 +36,45 @@ func (c *Client) ReleasePullRequests() (Response, error) {
 
 	return response, nil
 }
+
+func (c *Client) SetAutocompletionInPullRequest(pullRequestId int) (Response, error) {
+	repositoryId := viper.GetString(config.AzureRepositoryId)
+
+	endpoint := fmt.Sprintf("/git/repositories/%s/pullrequests/%d?api-version=7.1", repositoryId, pullRequestId)
+	fmt.Println(endpoint)
+
+	// Payload structure that will be sent in the PATCH request
+	//TODO Refactor to struct
+	payload := map[string]interface{}{
+		"completionOptions": map[string]interface{}{
+			"autoCompleteIgnoreConfigIds": []int{},
+			"bypassPolicy":                false,
+			"deleteSourceBranch":          false,
+			"mergeCommitMessage":          "Merged PR",
+			"mergeStrategy":               1,
+			"transitionWorkItems":         true,
+		},
+		"autoCompleteSetBy": map[string]interface{}{
+			"id": " ",
+		},
+	}
+
+	// Marshal the payload to JSON
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return Response{}, fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	// Call the DoRequest method to send the PATCH request
+	responseBody, err := c.DoRequest("PATCH", endpoint, body)
+	if err != nil {
+		return Response{}, fmt.Errorf("request failed: %w", err)
+	}
+
+	var response Response
+	if err := json.Unmarshal(responseBody, &response); err != nil {
+		return Response{}, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	return response, nil
+}

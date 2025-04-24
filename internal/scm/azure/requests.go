@@ -41,11 +41,10 @@ func (c *Client) SetAutocompletionInPullRequest(pullRequestId int) (Response, er
 	repositoryId := viper.GetString(config.AzureRepositoryId)
 
 	endpoint := fmt.Sprintf("/git/repositories/%s/pullrequests/%d?api-version=7.1", repositoryId, pullRequestId)
-	fmt.Println(endpoint)
 
 	// Payload structure that will be sent in the PATCH request
 	//TODO Refactor to struct
-	payload := map[string]interface{}{
+	body := map[string]interface{}{
 		"completionOptions": map[string]interface{}{
 			"autoCompleteIgnoreConfigIds": []int{},
 			"bypassPolicy":                false,
@@ -55,14 +54,8 @@ func (c *Client) SetAutocompletionInPullRequest(pullRequestId int) (Response, er
 			"transitionWorkItems":         true,
 		},
 		"autoCompleteSetBy": map[string]interface{}{
-			"id": " ",
+			"id": viper.GetString(config.AzureUserId),
 		},
-	}
-
-	// Marshal the payload to JSON
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return Response{}, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
 	// Call the DoRequest method to send the PATCH request

@@ -44,6 +44,7 @@ func initConfig() {
 		viper.SetDefault(config.JiraDomain, "")
 		viper.SetDefault(config.JiraJQL, "")
 		viper.SetDefault(config.JiraEmail, "")
+		viper.SetDefault(config.AzureUserId, "")
 		viper.SetDefault(config.AzureApiKey, "")
 		viper.SetDefault(config.AzureOrganization, "")
 		viper.SetDefault(config.AzureProject, "")

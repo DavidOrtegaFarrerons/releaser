@@ -6,6 +6,7 @@ const (
 	JiraDomain        = "JIRA_DOMAIN"
 	JiraJQL           = "JIRA_JQL"
 	JiraEmail         = "JIRA_EMAIL"
+	AzureUserId       = "AZURE_USER_ID"
 	AzureApiKey       = "AZURE_KEY"
 	AzureOrganization = "AZURE_ORGANIZATION"
 	AzureProject      = "AZURE_PROJECT"

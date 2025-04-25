@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"github.com/spf13/viper"
 	"os"
 	"os/exec"
+	"release-handler/config"
 	"release-handler/internal/helper"
 	"release-handler/internal/models"
 	"release-handler/internal/release"
@@ -15,7 +17,7 @@ import (
 )
 
 func CreateReleaseTable() {
-	mergedTickets := release.MergeTickets()
+	mergedTickets := release.MergeTickets(viper.GetString(config.JiraDefaultRelease))
 	ReleaseTable(mergedTickets)
 }
 

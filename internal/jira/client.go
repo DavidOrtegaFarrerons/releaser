@@ -11,9 +11,15 @@ import (
 	"release-handler/config"
 )
 
-func releaseVersionIssues() Response {
+func releaseVersionIssues(releaseName string) Response {
+	jql, err := getJQL(releaseName)
+
+	if err != nil {
+		fmt.Errorf("JQL could not be parsed, are you using the correct syntax? Error: %v", err)
+	}
+
 	payload := map[string]interface{}{
-		"jql": viper.GetString(config.JiraJQL),
+		"jql": jql,
 		"fields": []string{
 			"assignee",
 			"key",

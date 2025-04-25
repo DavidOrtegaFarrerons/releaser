@@ -17,6 +17,7 @@ type PullRequestDTO struct {
 	Url          string `json:"url"`
 	CreationDate string `json:"creationDate"`
 	MergeStatus  string `json:"mergeStatus"`
+	ReviewStatus string `json:"reviewStatus"`
 }
 
 type ReviewerDTO struct {
@@ -53,7 +54,8 @@ func ToPullRequestDTO(pr *azure.PullRequest) *PullRequestDTO {
 		BranchName:   strings.Replace(pr.BranchName, "refs/heads/", "", 1),
 		Url:          helper.GeneratePullRequestUrl(pr),
 		CreationDate: pr.CreationDate.Format(time.RFC3339),
-		Status:       azure.GetFinalReviewStatus(pr.Reviewers),
+		Status:       pr.Status,
+		ReviewStatus: azure.GetFinalReviewStatus(pr.Reviewers),
 	}
 }
 

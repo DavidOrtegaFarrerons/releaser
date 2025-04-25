@@ -9,13 +9,13 @@ import (
 	"release-handler/internal/scm/azure"
 )
 
-func MergeTickets() []models.TableTicket {
+func MergeTickets(releaseName string) []models.TableTicket {
 
 	ticketsChan := make(chan []jira.Ticket, 1)
 	pullRequestsChan := make(chan []azure.PullRequest, 1)
 
 	go func() {
-		tickets := jira.AllReleaseIssues()
+		tickets := jira.AllReleaseIssues(releaseName)
 		ticketsChan <- tickets
 	}()
 

@@ -25,7 +25,15 @@ func ReleaseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
-	tickets := release.MergeTickets()
+	releaseName := r.PathValue("releaseName")
+
+	if releaseName == "" {
+		releaseName = viper.GetString(config.JiraDefaultRelease)
+	}
+
+	releaseName = "Release/" + releaseName
+
+	tickets := release.MergeTickets(releaseName)
 
 	dtoResponse := make([]TableTicketDTO, 0, len(tickets))
 	for _, ticket := range tickets {

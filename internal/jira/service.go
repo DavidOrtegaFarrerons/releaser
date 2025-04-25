@@ -1,5 +1,5 @@
 package jira
 
-func AllReleaseIssues() []Ticket {
-	return releaseVersionIssues().Tickets
+func AllReleaseIssues(releaseName string) []Ticket {
+	return releaseVersionIssues(releaseName).Tickets
 }

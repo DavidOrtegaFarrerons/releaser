@@ -25,27 +25,29 @@ func ReleaseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
-	releaseName := r.PathValue("releaseName")
+	releaseDate := r.PathValue("releaseName")
 
-	if releaseName == "" {
-		releaseName = viper.GetString(config.JiraDefaultRelease)
+	if releaseDate == "" {
+		releaseDate = viper.GetString(config.JiraDefaultRelease)
 	}
 
-	releaseName = "Release/" + releaseName
+	releaseName := "Release/" + releaseDate
 
 	tickets := release.MergeTickets(releaseName)
 
-	dtoResponse := make([]TableTicketDTO, 0, len(tickets))
+	tableTickets := make([]TableTicketDTO, 0, len(tickets))
 	for _, ticket := range tickets {
-		dtoResponse = append(dtoResponse, ToTableTicketDTO(ticket))
+		tableTickets = append(tableTickets, ToTableTicketDTO(ticket))
 	}
 
-	if len(dtoResponse) == 0 {
+	if len(tableTickets) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(dtoResponse); err != nil {
+	response := ToResponse(tableTickets, releaseDate)
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }

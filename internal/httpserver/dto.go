@@ -42,6 +42,18 @@ type TableTicketDTO struct {
 	Ticket      *TicketDTO      `json:"ticket,omitempty"`
 }
 
+type Response struct {
+	TableTickets   []TableTicketDTO `json:"tableTickets"`
+	CurrentRelease string           `json:"currentRelease"`
+}
+
+func ToResponse(tableTickets []TableTicketDTO, currentRelease string) *Response {
+	return &Response{
+		TableTickets:   tableTickets,
+		CurrentRelease: currentRelease,
+	}
+}
+
 func ToPullRequestDTO(pr *azure.PullRequest) *PullRequestDTO {
 	if pr == nil {
 		return nil

@@ -79,7 +79,6 @@ func SetAutoCompletePullRequestHandler(w http.ResponseWriter, r *http.Request) {
 	client := azure.NewClient()
 	resp, err := client.SetAutocompletionInPullRequest(req.PullRequestId)
 	if err != nil {
-		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

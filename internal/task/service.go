@@ -4,6 +4,10 @@ type Service struct {
 	Repo Repository
 }
 
+func NewService(repo Repository) *Service {
+	return &Service{repo}
+}
+
 func (s *Service) AddTask(prId string, releaseId string, taskType TaskType, content string) error {
 	task := &Task{
 		PrId:      prId,

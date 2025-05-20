@@ -9,6 +9,10 @@ type PostgresRepository struct {
 	DB *sql.DB
 }
 
+func NewPostgresRepository(db *sql.DB) *PostgresRepository {
+	return &PostgresRepository{db}
+}
+
 func (r *PostgresRepository) Create(task *Task) error {
 	_, err := r.DB.ExecContext(context.Background(),
 		`INSERT INTO tasks (pr_id, release_id, type, content) VALUES ($1, $2, $3, $4)`,

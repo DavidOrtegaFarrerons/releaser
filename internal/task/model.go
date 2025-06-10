@@ -12,7 +12,7 @@ const (
 // Task Entity
 type Task struct {
 	ID        int64
-	PrId      string
+	PrId      int
 	ReleaseId string
 	Type      TaskType
 	Content   string
@@ -20,7 +20,7 @@ type Task struct {
 }
 
 type CreateTaskInput struct {
-	PrId      string   `json:"prId"`
+	PrId      int      `json:"prId"`
 	ReleaseId string   `json:"releaseId"`
 	Type      TaskType `json:"type"`
 	Content   string   `json:"content"`

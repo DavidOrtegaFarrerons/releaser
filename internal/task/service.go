@@ -8,7 +8,7 @@ func NewService(repo Repository) *Service {
 	return &Service{repo}
 }
 
-func (s *Service) AddTask(prId string, releaseId string, taskType TaskType, content string) error {
+func (s *Service) AddTask(prId int, releaseId string, taskType TaskType, content string) error {
 	task := &Task{
 		PrId:      prId,
 		ReleaseId: releaseId,

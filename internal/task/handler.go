@@ -2,6 +2,7 @@ package task
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/viper"
 	"net/http"
 	"release-handler/config"
@@ -30,6 +31,7 @@ func (h *Handler) AddTask(w http.ResponseWriter, r *http.Request) {
 	var input CreateTaskInput
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		fmt.Println(err.Error())
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}

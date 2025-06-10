@@ -30,7 +30,7 @@ func MergeTickets(releaseName string) []models.TableTicket {
 	ticketsAndMergeRequestsMap := make(map[string]models.TableTicket)
 
 	createTicketMap(tickets, ticketsAndMergeRequestsMap)
-	AddPullRequestsToTickets(pullRequests, ticketsAndMergeRequestsMap)
+	addPullRequestsToTickets(pullRequests, ticketsAndMergeRequestsMap)
 
 	orderedTickets := make([]models.TableTicket, 0)
 
@@ -43,7 +43,7 @@ func MergeTickets(releaseName string) []models.TableTicket {
 	return orderedTickets
 }
 
-func AddPullRequestsToTickets(pullRequests []azure.PullRequest, m map[string]models.TableTicket) {
+func addPullRequestsToTickets(pullRequests []azure.PullRequest, m map[string]models.TableTicket) {
 	for _, mr := range pullRequests {
 		ticketPrefix := ticketPrefix(mr.BranchName)
 		if ticket, exists := m[ticketPrefix]; exists {

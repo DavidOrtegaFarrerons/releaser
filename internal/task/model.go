@@ -25,3 +25,8 @@ type CreateTaskInput struct {
 	Type      TaskType `json:"type"`
 	Content   string   `json:"content"`
 }
+
+type GetTasksByIdInput struct {
+	PrIds []int    `json:"prIds"`
+	Type  TaskType `json:"type"`
+}

@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"database/sql"
+	"github.com/lib/pq"
 )
 
 type PostgresRepository struct {
@@ -55,4 +56,32 @@ func (r *PostgresRepository) DeleteById(id int) error {
 		id)
 
 	return err
+}
+
+func (r *PostgresRepository) GetByIdsAndType(ids []int, taskType TaskType) ([]Task, error) {
+	rows, err := r.DB.QueryContext(context.Background(),
+		`SELECT pr_id, content FROM tasks WHERE pr_id = ANY($1) AND type = $2`,
+		pq.Array(ids), taskType)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var tasks []Task
+
+	for rows.Next() {
+		var t Task
+		err := rows.Scan(&t.PrId, &t.Content)
+
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, t)
+
+	}
+
+	return tasks, err
 }

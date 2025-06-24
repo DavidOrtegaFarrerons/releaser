@@ -13,6 +13,7 @@ func NewRouter(taskHandler *task.Handler) *http.ServeMux {
 	mux.HandleFunc("/api/set-autocomplete", SetAutoCompletePullRequestHandler)
 
 	mux.HandleFunc("/api/task", taskHandler.AddTask)
+	mux.HandleFunc("/api/tasks", taskHandler.GetTasksByIds)
 
 	return mux
 }
